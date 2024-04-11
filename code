@@ -1,0 +1,68 @@
+# This program interacts with the Love Calculator API. It retrieves data on
+# compatibility between different names and transforms the data into a fun
+# app which allows user to enter specific searches and then delivers a message
+# based on the data the search retrieves.
+
+# The Love Calculator API is free to use but you need to register in order to
+# obtain a private access key, which you should replace 'YOUR-KEY!!!' below with.
+
+# The random module is inbuilt, but the requests module needs to be downloaded:
+# in your IDE, hover over the module and then click 'Download', or manually
+# download it in your Terminal using the pip install command.
+
+import requests
+import random
+
+# Retrieve compatibility data from Love Calculator API
+def love_calculator(first_name, second_name):
+    url = "https://love-calculator.p.rapidapi.com/getPercentage"
+    params = {'fname': first_name, 'sname': second_name}
+    headers = {
+        'x-rapidapi-key': 'YOUR-KEY!!!'',
+        'x-rapidapi-host': 'love-calculator.p.rapidapi.com'
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+
+    data = response.json()
+
+    return int(data['percentage'])
+
+# Write results to file so user can compare previous entries
+# Use string slicing to save only the initials for anonymity
+def save_to_file(names, percentage):
+    with open("love_calculation_results.txt", "a") as file:
+        first_initial = names[0][0]
+        second_initial = names[1][0]
+        file.write(f"The love percentage between {first_initial} and {second_initial} is {percentage}%!\n")
+
+# Make use of random module to print different reactions to user
+def random_reaction():
+    reactions = ["Howdy! ", "Woohoo! ", "Hmmm... ", "Alrighty then... ", "Wow! "]
+    return random.choice(reactions)
+
+# Print different messages to user according to compatibility result
+def print_love_percentage(first_name, second_name, percentage):
+    reaction = random_reaction()
+    if percentage > 80:
+        print(f"\n{reaction}Over-achievers! Your compatibility is {percentage}%. Marriage material!")
+    elif percentage > 50:
+        print(f"\n{reaction}Pretty cool! Your compatibility is {percentage}%. Shoot for the moon!")
+    else:
+        print(f"\n{reaction}Your compatibility is {percentage}%. But opposites attract! Go for it!")
+
+# Loop the program so the user can keep playing
+while True:
+    print("\nWelcome! Let's see if you and your beloved are compatible.")
+    first_name = input("Enter your name: ")
+    second_name = input("Enter the name of your beloved: ")
+
+    love_percentage = love_calculator(first_name, second_name)
+
+    print_love_percentage(first_name, second_name, love_percentage)
+
+    save_to_file([first_name, second_name], love_percentage)
+
+    another_round = input("\nWould you like to play again? Y/N ")
+    if another_round.upper() == 'N':
+        break
